@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 // import useSelector and useDispatch hook from redux
 import { useDispatch } from "react-redux";
 // Importing state actions from home slice
-import { getApiConfiguration } from "./store/homeSlice";
+import { getApiConfiguration, getGenres } from "./store/homeSlice";
 // PAGES IMPORTS
 import Home from "./pages/home/Home";
 import SearchResult from "./pages/searchResult/SearchResult";
@@ -42,8 +42,24 @@ function App() {
       });
   };
 
+  const genersCall = async () => {
+    const promises = [];
+    const endPoints = ["tv", "movie"];
+    const allGenres = {};
+    endPoints.forEach((url) => {
+      promises.push(fetchDataFromApi(`/genre/${url}/list`));
+    });
+
+    const data = await Promise.all(promises);
+    data.map(({ genres }) => {
+      return genres.map((item) => (allGenres[item.id] = item));
+    });
+    dispatch(getGenres(allGenres));
+  };
+
   useEffect(() => {
     fetchApiConfig();
+    genersCall();
   }, []);
 
   return (
